@@ -285,26 +285,32 @@ public class GUI_Phieu_muon extends JFrame {
 		JButton btnThem = new JButton("Thêm");
 		btnThem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(txtMaPhieuMuon.getText().equals("") || txtNgayMuon.getText().equals("") || cbbMaSach.getSelectedIndex() == -1 || comboBox_1.getSelectedIndex() == -1) {
-					JOptionPane.showMessageDialog(null, "Bạn chưa nhập đủ thông tin!" , "Thông báo", 1);
-				}
-				else
-				{
-					if(insertPhieuMuon(txtMaPhieuMuon.getText(), Date.valueOf(txtNgayMuon.getText()),Date.valueOf(txtHanTra.getText()), (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem())) {
-						JOptionPane.showMessageDialog(null, "Thêm thành công!" , "Thông báo", 1);
-						Process_Sach ps = new Process_Sach();
-						ps.updateSachTrangThai((String)cbbMaSach.getSelectedItem());
-						txtMaPhieuMuon.setText(null);
-						txtHanTra.setText(null);
-						txtNgayTra.setText(null);
-						txtNgayMuon.setText(null);
-						cbbMaSach.setSelectedIndex(-1);
-						comboBox_1.setSelectedIndex(-1);
+				try {
+					if(txtMaPhieuMuon.getText().equals("") || txtNgayMuon.getText().equals("") || cbbMaSach.getSelectedIndex() == -1 || comboBox_1.getSelectedIndex() == -1) {
+						JOptionPane.showMessageDialog(null, "Bạn chưa nhập đủ thông tin!" , "Thông báo", 1);
+					} else {
+						// Kiểm tra định dạng ngày
+						Date ngayMuon = Date.valueOf(txtNgayMuon.getText());
+						Date hanTra = Date.valueOf(txtHanTra.getText());
+						if(insertPhieuMuon(txtMaPhieuMuon.getText(), ngayMuon, hanTra, (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem())) {
+							JOptionPane.showMessageDialog(null, "Thêm thành công!" , "Thông báo", 1);
+							Process_Sach ps = new Process_Sach();
+							ps.updateSachTrangThai((String)cbbMaSach.getSelectedItem());
+							txtMaPhieuMuon.setText(null);
+							txtHanTra.setText(null);
+							txtNgayTra.setText(null);
+							txtNgayMuon.setText(null);
+							cbbMaSach.setSelectedIndex(-1);
+							comboBox_1.setSelectedIndex(-1);
+						} else {
+							JOptionPane.showMessageDialog(null, "Thêm thất bại! Có thể do trùng mã hoặc lỗi dữ liệu." , "Thông báo", 1);
+							getAllPhieuMuon();
+						}
 					}
-					else {
-						JOptionPane.showMessageDialog(null, "Thêm thất bại!" , "Thông báo", 1);
-						getAllPhieuMuon();
-					}
+				} catch (IllegalArgumentException ex) {
+					JOptionPane.showMessageDialog(null, "Định dạng ngày không hợp lệ! Đúng: yyyy-MM-dd" , "Lỗi", 1);
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage(), "Lỗi", 1);
 				}
 			}
 		});
@@ -316,26 +322,25 @@ public class GUI_Phieu_muon extends JFrame {
 		btnSua.setEnabled(false);
 		btnSua.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				
-				int n = JOptionPane.showConfirmDialog(panel, "Bạn muốn sửa?", "Thông báo", JOptionPane.YES_NO_OPTION);
-				if(n == JOptionPane.YES_OPTION) {
-
-					if(txtNgayTra.getText().equals(""))
-					{
-						updatePhieuMuon(txtMaPhieuMuon.getText(), Date.valueOf(txtNgayMuon.getText()),Date.valueOf(txtHanTra.getText()), (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem());
+				try {
+					int n = JOptionPane.showConfirmDialog(panel, "Bạn muốn sửa?", "Thông báo", JOptionPane.YES_NO_OPTION);
+					if(n == JOptionPane.YES_OPTION) {
+						if(txtNgayTra.getText().equals("")) {
+							Date ngayMuon = Date.valueOf(txtNgayMuon.getText());
+							Date hanTra = Date.valueOf(txtHanTra.getText());
+							updatePhieuMuon(txtMaPhieuMuon.getText(), ngayMuon, hanTra, (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem());
+						} else {
+							Date ngayTra = Date.valueOf(txtNgayTra.getText());
+							updatePMNgayTra(ngayTra, txtMaPhieuMuon.getText());
+							Process_Sach ps = new Process_Sach();
+							ps.updateSachTrangThai2((String)cbbMaSach.getSelectedItem());
+						}
 					}
-					else {
-						updatePMNgayTra(Date.valueOf(txtNgayTra.getText()), txtMaPhieuMuon.getText());
-						Process_Sach ps = new Process_Sach();
-						ps.updateSachTrangThai2((String)cbbMaSach.getSelectedItem());
-						
-					}
+				} catch (IllegalArgumentException ex) {
+					JOptionPane.showMessageDialog(null, "Định dạng ngày không hợp lệ! Đúng: yyyy-MM-dd" , "Lỗi", 1);
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage(), "Lỗi", 1);
 				}
-				
-
-				
-
 			}
 		});
 		btnSua.setFont(new Font("Tahoma", Font.PLAIN, 15));
