@@ -173,4 +173,13 @@ Connect_database cd = new Connect_database();
 	    return tenSachList;
 	}
 
+	// Lấy danh sách mã sách
+	public ArrayList<String> getListSachMa() {
+		ArrayList<String> ds = new ArrayList<>();
+		for (Sach s : getListSach()) {
+			ds.add(s.getMaSach());
+		}
+		return ds;
+	}
+
 }

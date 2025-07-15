@@ -94,4 +94,13 @@ Connect_database cd = new Connect_database();
 			return false;
 		}
 	}
+
+	// Lấy danh sách mã người mượn
+	public ArrayList<String> getListMaNguoiMuon() {
+		ArrayList<String> ds = new ArrayList<>();
+		for (NguoiMuon nm : getListNguoiMuon()) {
+			ds.add(nm.getMaNguoiMuon());
+		}
+		return ds;
+	}
 }

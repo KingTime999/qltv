@@ -30,6 +30,7 @@ public class GUI_Phieu_muon extends JFrame {
 
 	private JPanel contentPane;
 	private JTable table;
+	private JButton btnXoa;
 	
 	
 	DefaultTableModel Model = new DefaultTableModel();
@@ -80,52 +81,12 @@ public class GUI_Phieu_muon extends JFrame {
 		}
 	}
 
-	public void updatePhieuMuon(String MaPhieuMuon, Date NgayMuon,Date HanTra, String MaSach, String MaNguoiMuon) {
-		Model.setRowCount(0);
-		if(ppm.updatePhieuMuon(MaPhieuMuon, NgayMuon,HanTra, MaSach, MaNguoiMuon)) {
-			ArrayList<PhieuMuon> ls = ppm.getListPhieuMuon();
-			for (int i = 0; i < ls.size(); i++) {
-				PhieuMuon s = (PhieuMuon) ls.get(i);
-				Vector<Object> tbRow = new Vector<>();
-				tbRow.add(s.getMaPhieuMuon());
-				tbRow.add(s.getNgayMuon());
-				tbRow.add(s.getHanTra());
-				tbRow.add(s.getMaSach());
-				tbRow.add(s.getMaNguoiMuon());
-				tbRow.add(s.getNgayTra());
-				rows.add(tbRow);
-			}
-			Model.setDataVector(rows, columns);
-			table.setModel(Model);
-		}
-		else {
-			System.out.println(false);
-		}
-		
+	public boolean updatePhieuMuon(String MaPhieuMuon, Date NgayMuon, Date HanTra, String MaSach, String MaNguoiMuon, Date NgayTra) {
+		return ppm.updatePhieuMuon(MaPhieuMuon, NgayMuon, HanTra, MaSach, MaNguoiMuon, NgayTra);
 	}
 	
-	public void updatePMNgayTra(Date NgayTra, String MaPhieuMuon) {
-		Model.setRowCount(0);
-		if(ppm.updatePhieuMuonNgayTra(NgayTra, MaPhieuMuon)) {
-			ArrayList<PhieuMuon> ls = ppm.getListPhieuMuon();
-			for (int i = 0; i < ls.size(); i++) {
-				PhieuMuon s = (PhieuMuon) ls.get(i);
-				Vector<Object> tbRow = new Vector<>();
-				tbRow.add(s.getMaPhieuMuon());
-				tbRow.add(s.getNgayMuon());
-				tbRow.add(s.getHanTra());
-				tbRow.add(s.getMaSach());
-				tbRow.add(s.getMaNguoiMuon());
-				tbRow.add(s.getNgayTra());
-				rows.add(tbRow);
-			}
-			Model.setDataVector(rows, columns);
-			table.setModel(Model);
-		}
-		else {
-			System.out.println(false);
-		}
-		
+	public boolean updatePMNgayTra(Date NgayTra, String MaPhieuMuon) {
+		return ppm.updatePhieuMuonNgayTra(NgayTra, MaPhieuMuon);
 	}
 	
 	public boolean delPhieuMuon(String MaPhieuMuon) {
@@ -285,26 +246,32 @@ public class GUI_Phieu_muon extends JFrame {
 		JButton btnThem = new JButton("Thêm");
 		btnThem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(txtMaPhieuMuon.getText().equals("") || txtNgayMuon.getText().equals("") || cbbMaSach.getSelectedIndex() == -1 || comboBox_1.getSelectedIndex() == -1) {
-					JOptionPane.showMessageDialog(null, "Bạn chưa nhập đủ thông tin!" , "Thông báo", 1);
-				}
-				else
-				{
-					if(insertPhieuMuon(txtMaPhieuMuon.getText(), Date.valueOf(txtNgayMuon.getText()),Date.valueOf(txtHanTra.getText()), (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem())) {
-						JOptionPane.showMessageDialog(null, "Thêm thành công!" , "Thông báo", 1);
-						Process_Sach ps = new Process_Sach();
-						ps.updateSachTrangThai((String)cbbMaSach.getSelectedItem());
-						txtMaPhieuMuon.setText(null);
-						txtHanTra.setText(null);
-						txtNgayTra.setText(null);
-						txtNgayMuon.setText(null);
-						cbbMaSach.setSelectedIndex(-1);
-						comboBox_1.setSelectedIndex(-1);
+				try {
+					if(txtMaPhieuMuon.getText().equals("") || txtNgayMuon.getText().equals("") || cbbMaSach.getSelectedIndex() == -1 || comboBox_1.getSelectedIndex() == -1) {
+						JOptionPane.showMessageDialog(null, "Bạn chưa nhập đủ thông tin!" , "Thông báo", 1);
+					} else {
+						// Kiểm tra định dạng ngày
+						Date ngayMuon = Date.valueOf(txtNgayMuon.getText());
+						Date hanTra = Date.valueOf(txtHanTra.getText());
+						if(insertPhieuMuon(txtMaPhieuMuon.getText(), ngayMuon, hanTra, (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem())) {
+							JOptionPane.showMessageDialog(null, "Thêm thành công!" , "Thông báo", 1);
+							Process_Sach ps = new Process_Sach();
+							ps.updateSachTrangThai((String)cbbMaSach.getSelectedItem());
+							txtMaPhieuMuon.setText(null);
+							txtHanTra.setText(null);
+							txtNgayTra.setText(null);
+							txtNgayMuon.setText(null);
+							cbbMaSach.setSelectedIndex(-1);
+							comboBox_1.setSelectedIndex(-1);
+						} else {
+							JOptionPane.showMessageDialog(null, "Thêm thất bại! Có thể do trùng mã hoặc lỗi dữ liệu." , "Thông báo", 1);
+							getAllPhieuMuon();
+						}
 					}
-					else {
-						JOptionPane.showMessageDialog(null, "Thêm thất bại!" , "Thông báo", 1);
-						getAllPhieuMuon();
-					}
+				} catch (IllegalArgumentException ex) {
+					JOptionPane.showMessageDialog(null, "Định dạng ngày không hợp lệ! Đúng: yyyy-MM-dd" , "Lỗi", 1);
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage(), "Lỗi", 1);
 				}
 			}
 		});
@@ -316,33 +283,53 @@ public class GUI_Phieu_muon extends JFrame {
 		btnSua.setEnabled(false);
 		btnSua.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				
-				int n = JOptionPane.showConfirmDialog(panel, "Bạn muốn sửa?", "Thông báo", JOptionPane.YES_NO_OPTION);
-				if(n == JOptionPane.YES_OPTION) {
+				try {
+					int n = JOptionPane.showConfirmDialog(panel, "Bạn muốn sửa?", "Thông báo", JOptionPane.YES_NO_OPTION);
+					if(n == JOptionPane.YES_OPTION) {
+						String maPhieuMuon = txtMaPhieuMuon.getText();
+						String maSach = (String) cbbMaSach.getSelectedItem();
+						String maNguoiMuon = (String) comboBox_1.getSelectedItem();
+						Date ngayMuon = Date.valueOf(txtNgayMuon.getText());
+						Date hanTra = Date.valueOf(txtHanTra.getText());
+						Date ngayTra = null;
+						if (!txtNgayTra.getText().trim().isEmpty()) {
+							ngayTra = Date.valueOf(txtNgayTra.getText());
+						}
+						boolean updateSuccess = updatePhieuMuon(maPhieuMuon, ngayMuon, hanTra, maSach, maNguoiMuon, ngayTra);
 
-					if(txtNgayTra.getText().equals(""))
-					{
-						updatePhieuMuon(txtMaPhieuMuon.getText(), Date.valueOf(txtNgayMuon.getText()),Date.valueOf(txtHanTra.getText()), (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem());
+						if(updateSuccess) {
+							// Nếu có ngày trả thì cập nhật trạng thái sách
+							if(ngayTra != null) {
+								Process_Sach ps = new Process_Sach();
+								ps.updateSachTrangThai2(maSach);
+							}
+							// Làm mới bảng và reset form như cũ
+							getAllPhieuMuon();
+							btnThem.setEnabled(true);
+							txtMaPhieuMuon.setEnabled(true);
+							btnSua.setEnabled(false);
+							btnXoa.setEnabled(false);
+							txtNgayTra.setEnabled(false);
+							txtMaPhieuMuon.setText(null);
+							txtHanTra.setText(null);
+							txtNgayTra.setText(null);
+							txtNgayMuon.setText(null);
+							cbbMaSach.setSelectedIndex(-1);
+							comboBox_1.setSelectedIndex(-1);
+						}
 					}
-					else {
-						updatePMNgayTra(Date.valueOf(txtNgayTra.getText()), txtMaPhieuMuon.getText());
-						Process_Sach ps = new Process_Sach();
-						ps.updateSachTrangThai2((String)cbbMaSach.getSelectedItem());
-						
-					}
+				} catch (IllegalArgumentException ex) {
+					JOptionPane.showMessageDialog(null, "Định dạng ngày không hợp lệ! Đúng: yyyy-MM-dd" , "Lỗi", 1);
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage(), "Lỗi", 1);
 				}
-				
-
-				
-
 			}
 		});
 		btnSua.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		btnSua.setBounds(283, 194, 125, 31);
 		contentPane.add(btnSua);
 		
-		JButton btnXoa = new JButton("Xóa");
+		btnXoa = new JButton("Xóa");
 		btnXoa.setEnabled(false);
 		btnXoa.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -396,9 +383,36 @@ public class GUI_Phieu_muon extends JFrame {
 				txtMaPhieuMuon.setText((String)(Model.getValueAt(index, 0)));
 				txtNgayMuon.setText( (Model.getValueAt(index, 1)).toString());
 				txtHanTra.setText( (Model.getValueAt(index, 2)).toString());
-				cbbMaSach.addItem((String)(Model.getValueAt(index, 3)));
-				cbbMaSach.setSelectedItem((String)(Model.getValueAt(index, 3)));
-				comboBox_1.setSelectedItem((String)(Model.getValueAt(index, 4)));
+				
+				// Đảm bảo combo box có dữ liệu trước khi set selected item
+				String maSach = (String)(Model.getValueAt(index, 3));
+				String maNguoiMuon = (String)(Model.getValueAt(index, 4));
+				
+				// Kiểm tra và thêm vào combo box nếu chưa có
+				boolean sachExists = false;
+				boolean nguoiMuonExists = false;
+				
+				for(int i = 0; i < cbbMaSach.getItemCount(); i++) {
+					if(cbbMaSach.getItemAt(i).equals(maSach)) {
+						sachExists = true;
+						break;
+					}
+				}
+				if(!sachExists) {
+					cbbMaSach.addItem(maSach);
+				}
+				cbbMaSach.setSelectedItem(maSach);
+				
+				for(int i = 0; i < comboBox_1.getItemCount(); i++) {
+					if(comboBox_1.getItemAt(i).equals(maNguoiMuon)) {
+						nguoiMuonExists = true;
+						break;
+					}
+				}
+				if(!nguoiMuonExists) {
+					comboBox_1.addItem(maNguoiMuon);
+				}
+				comboBox_1.setSelectedItem(maNguoiMuon);
 
 				try {
 					txtNgayTra.setText( (Model.getValueAt(index, 5)).toString());

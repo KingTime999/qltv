@@ -37,9 +37,9 @@ public class Process_PhieuMuon {
 	}
 	public boolean insertPhieuMuon(String MaPhieuMuon, Date NgayMuon, Date HanTra, String MaSach, String MaNguoiMuon) {
 		Connection cn = cd.getCon();
-		String sql = "INSERT INTO `qltv`.`tb_phieumuon` (`MaPhieuMuon`, `NgayMuon`, `HanTra`, `MaSach`, `MaNguoiMuon`) VALUES (?, ?, ?, ?, ?);";
+		String sql = "INSERT INTO tb_phieumuon (MaPhieuMuon, NgayMuon, HanTra, MaSach, MaNguoiMuon) VALUES (?, ?, ?, ?, ?);";
 		try {
-			PreparedStatement ps = (PreparedStatement) cn.prepareStatement(sql);
+			PreparedStatement ps = cn.prepareStatement(sql);
 			ps.setString(1, MaPhieuMuon);
 			ps.setDate(2, NgayMuon);
 			ps.setDate(3, HanTra);
@@ -47,30 +47,36 @@ public class Process_PhieuMuon {
 			ps.setString(5, MaNguoiMuon);
 			ps.executeUpdate();
 			ps.close();
-
 			return true;
 		}catch (Exception e) {
-
+			e.printStackTrace();
+			javax.swing.JOptionPane.showMessageDialog(null, "Lỗi SQL: " + e.getMessage(), "Lỗi", 1);
 			return false;
 		}
 	}
 	
-	public boolean updatePhieuMuon(String MaPhieuMuon, Date NgayMuon, Date HanTra, String MaSach, String MaNguoiMuon) {
+	public boolean updatePhieuMuon(String MaPhieuMuon, Date NgayMuon, Date HanTra, String MaSach, String MaNguoiMuon, Date NgayTra) {
 		Connection cn = cd.getCon();
-		String sql = "UPDATE `qltv`.`tb_phieumuon` SET NgayMuon = ?, HanTra = ? , MaSach = ? , MaNguoiMuon = ? where MaPhieuMuon = ?";
+		String sql = "UPDATE tb_phieumuon SET NgayMuon = ?, HanTra = ?, MaSach = ?, MaNguoiMuon = ?, NgayTra = ? WHERE MaPhieuMuon = ?";
 		try {
-			PreparedStatement ps = (PreparedStatement) cn.prepareStatement(sql);
-			ps.setString(5, MaPhieuMuon);
+			PreparedStatement ps = cn.prepareStatement(sql);
 			ps.setDate(1, NgayMuon);
 			ps.setDate(2, HanTra);
 			ps.setString(3, MaSach);
 			ps.setString(4, MaNguoiMuon);
-			ps.executeUpdate();
+			ps.setDate(5, NgayTra); // Có thể là null
+			ps.setString(6, MaPhieuMuon);
+			int rows = ps.executeUpdate();
 			ps.close();
+			if (rows == 0) {
+				JOptionPane.showMessageDialog(null, "Không tìm thấy phiếu mượn để cập nhật!", "Thông báo", 1);
+				return false;
+			}
 			JOptionPane.showMessageDialog(null, "Cập nhật thành công!" , "Thông báo", 1);
 			return true;
-		}catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Cập nhật thất bại!" , "Thông báo", 1);
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Cập nhật thất bại!\n" + e.getMessage(), "Thông báo", 1);
 			return false;
 		}
 	}
@@ -174,5 +180,36 @@ public class Process_PhieuMuon {
 			e.printStackTrace();
 		}
 		return arr;
+	}
+
+	// Kiểm tra mã phiếu mượn đã tồn tại
+	public boolean isMaPhieuMuonExists(String maPhieuMuon) {
+		Connection cn = cd.getCon();
+		String sql = "SELECT 1 FROM tb_phieumuon WHERE MaPhieuMuon = ?";
+		try {
+			PreparedStatement ps = cn.prepareStatement(sql);
+			ps.setString(1, maPhieuMuon);
+			ResultSet rs = ps.executeQuery();
+			boolean exists = rs.next();
+			rs.close();
+			ps.close();
+			return exists;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	// Kiểm tra mã sách đã tồn tại
+	public boolean isMaSachExists(String maSach) {
+		Process_Sach ps = new Process_Sach();
+		ArrayList<String> ds = ps.getListSachMa();
+		return ds.contains(maSach);
+	}
+
+	// Kiểm tra mã người mượn đã tồn tại
+	public boolean isMaNguoiMuonExists(String maNguoiMuon) {
+		Process_NguoiMuon pnm = new Process_NguoiMuon();
+		ArrayList<String> ds = pnm.getListMaNguoiMuon();
+		return ds.contains(maNguoiMuon);
 	}
 }

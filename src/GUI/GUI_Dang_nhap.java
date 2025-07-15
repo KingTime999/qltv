@@ -9,9 +9,7 @@ import javax.swing.border.EmptyBorder;
 import Process.Connect_database;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-
 import java.awt.Font;
-
 import javax.swing.JTextArea;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
