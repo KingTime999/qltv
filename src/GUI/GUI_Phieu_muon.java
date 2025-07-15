@@ -286,6 +286,7 @@ public class GUI_Phieu_muon extends JFrame {
 				try {
 					int n = JOptionPane.showConfirmDialog(panel, "Bạn muốn sửa?", "Thông báo", JOptionPane.YES_NO_OPTION);
 					if(n == JOptionPane.YES_OPTION) {
+<<<<<<< HEAD
 						String maPhieuMuon = txtMaPhieuMuon.getText();
 						String maSach = (String) cbbMaSach.getSelectedItem();
 						String maNguoiMuon = (String) comboBox_1.getSelectedItem();
@@ -316,6 +317,17 @@ public class GUI_Phieu_muon extends JFrame {
 							txtNgayMuon.setText(null);
 							cbbMaSach.setSelectedIndex(-1);
 							comboBox_1.setSelectedIndex(-1);
+=======
+						if(txtNgayTra.getText().equals("")) {
+							Date ngayMuon = Date.valueOf(txtNgayMuon.getText());
+							Date hanTra = Date.valueOf(txtHanTra.getText());
+							updatePhieuMuon(txtMaPhieuMuon.getText(), ngayMuon, hanTra, (String)cbbMaSach.getSelectedItem(), (String)comboBox_1.getSelectedItem());
+						} else {
+							Date ngayTra = Date.valueOf(txtNgayTra.getText());
+							updatePMNgayTra(ngayTra, txtMaPhieuMuon.getText());
+							Process_Sach ps = new Process_Sach();
+							ps.updateSachTrangThai2((String)cbbMaSach.getSelectedItem());
+>>>>>>> 6b0b5f9d9ecd919bf07a2b89e4779035e13485ad
 						}
 					}
 				} catch (IllegalArgumentException ex) {
